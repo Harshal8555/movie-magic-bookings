@@ -5,7 +5,8 @@ import { useBooking } from "@/contexts/BookingContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, Users, ArrowLeft, CheckCircle } from "lucide-react";
+import { PaymentForm } from "@/components/PaymentForm";
+import { Calendar, Clock, Users, ArrowLeft, CheckCircle } from "lucide-react";
 
 export default function BookMovie() {
   const { id } = useParams();
@@ -56,7 +57,7 @@ export default function BookMovie() {
     );
   };
 
-  const handleBooking = () => {
+  const handlePaymentSuccess = () => {
     if (!movie || selectedSeats.length === 0) return;
 
     addBooking({
@@ -68,7 +69,7 @@ export default function BookMovie() {
       totalPrice: selectedSeats.length * movie.price
     });
 
-    setStep(3);
+    setStep(4);
   };
 
   if (!movie) {
@@ -119,8 +120,30 @@ export default function BookMovie() {
     );
   }
 
-  // Success Step
+  // Payment Step
   if (step === 3) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="pt-24 pb-12 px-4">
+          <div className="container mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="font-display text-2xl text-foreground">{movie.title}</h2>
+              <p className="text-muted-foreground">{selectedDate} at {selectedTime} • {selectedSeats.length} seat(s)</p>
+            </div>
+            <PaymentForm 
+              amount={selectedSeats.length * movie.price}
+              onSuccess={handlePaymentSuccess}
+              onBack={() => setStep(2)}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Success Step
+  if (step === 4) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -130,8 +153,8 @@ export default function BookMovie() {
               <div className="w-20 h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center mb-6">
                 <CheckCircle className="w-10 h-10 text-green-500" />
               </div>
-              <h2 className="font-display text-3xl mb-2 text-foreground">Booking Confirmed!</h2>
-              <p className="text-muted-foreground mb-6">Your tickets have been booked successfully</p>
+              <h2 className="font-display text-3xl mb-2 text-foreground">Payment Successful!</h2>
+              <p className="text-muted-foreground mb-6">Your tickets have been booked and paid for</p>
               
               <div className="text-left space-y-3 p-4 rounded-lg bg-secondary/50 mb-6">
                 <div className="flex justify-between">
@@ -151,7 +174,7 @@ export default function BookMovie() {
                   <span className="font-medium">{selectedSeats.length} seat(s)</span>
                 </div>
                 <div className="flex justify-between border-t border-border pt-3">
-                  <span className="text-muted-foreground">Total</span>
+                  <span className="text-muted-foreground">Total Paid</span>
                   <span className="font-display text-xl text-primary">${selectedSeats.length * movie.price}</span>
                 </div>
               </div>
@@ -338,11 +361,11 @@ export default function BookMovie() {
                     Back
                   </Button>
                   <Button 
-                    onClick={handleBooking}
+                    onClick={() => setStep(3)}
                     disabled={selectedSeats.length === 0}
                     className="flex-1 cinema-button"
                   >
-                    Confirm Booking
+                    Proceed to Payment
                   </Button>
                 </div>
               </div>
